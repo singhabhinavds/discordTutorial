@@ -34,11 +34,8 @@ async def on_member_join(member):
     )
 
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
+@bot.command(name='99', help='responds with random quotes from brooklyn 99')
+async def nine_nine(ctx):
     brooklyn_99_quotes = [
         'I\'m the human form of the 100 emoji.',
         'Bingpot!',
@@ -48,8 +45,31 @@ async def on_message(message):
         ),
     ]
 
-    if message.content == '99!':
-        response = random.choice(brooklyn_99_quotes)
-        await message.channel.send(response)
+    response = random.choice(brooklyn_99_quotes)
+    await ctx.send(response)
+
+
+@bot.command(name='roll_dice', help='roll the dice with user defined variables')
+async def simulate_rolls(ctx, number_of_rolls: int, number_of_sides: int):
+    dice = [
+        str(random.choice(range(1, number_of_sides + 1)))
+        for _ in range(number_of_rolls)
+    ]
+
+    await ctx.send(', '.join(dice))
+
+
+@bot.command(name='create_channel')
+@commands.has_role('admin')
+async def create_channel(ctx, channel_name='real-python'):
+    guild = ctx.guild
+    existing_channel = discord.utils.get(guild.channels, name = channel_name)
+    if not existing_channel:
+        print(f'Creating a new channel: {channel_name}')
+        await guild.create_text_channel(channel_name)
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send(" You do not have the correct role for this command.")
 
 bot.run(TOKEN)
